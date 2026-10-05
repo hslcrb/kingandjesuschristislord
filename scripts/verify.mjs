@@ -1,0 +1,83 @@
+import { chromium } from '@playwright/test';
+import assert from 'node:assert/strict';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { scenes, sceneStarts, totalDuration } from '../src/story.js';
+import { books } from '../src/books.js';
+
+mkdirSync('artifacts', { recursive: true });
+const report = { duration: totalDuration, chapters: scenes.length, books: books.length, checks: [], errors: [] };
+assert.equal(books.length, 66); assert.equal(new Set(books.map(b=>b.name)).size, 66);
+for (const b of books) assert.ok(scenes.some(s=>s.id===b.scene), `missing scene for ${b.name}`);
+report.checks.push('All 66 unique canonical books have valid film destinations.');
+const browser = await chromium.launch({ channel: 'msedge', headless: true, timeout: 120000 });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+page.setDefaultTimeout(60000);
+page.on('pageerror', e=>report.errors.push(e.message));
+page.on('console', m=>{if(m.type()==='error')report.errors.push(m.text());});
+const seek = async seconds => page.locator('#timeline').evaluate((el,t)=>{el.value=t;el.dispatchEvent(new Event('input',{bubbles:true}));}, seconds);
+try {
+  console.log('Verify: loading');
+  await page.goto('http://127.0.0.1:5197', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.locator('#start').waitFor(); await page.evaluate(()=>document.fonts.ready);
+  assert.equal(await page.locator('#render-status').isVisible(), false, 'WebGL fallback unexpectedly active');
+  await page.waitForFunction(()=>document.querySelector('#score-track').readyState>=1&&document.querySelector('#narration-track').readyState>=1,null,{timeout:120000});
+  const durations=await page.evaluate(()=>['score-track','narration-track'].map(id=>document.getElementById(id).duration));
+  durations.forEach(d=>assert.ok(Math.abs(d-totalDuration)<.15, `wrong media duration ${d}`));
+  report.checks.push(`Both complete audio files match ${totalDuration}s timeline.`);
+  await page.screenshot({path:'artifacts/hero-desktop.png'});
+  await page.locator('#start').click();
+  await page.waitForFunction(()=>document.querySelector('#narration-track').currentTime>1,null,{timeout:60000});
+  await page.locator('#play').click();
+  assert.equal(await page.locator('#play').getAttribute('aria-label'),'재생');
+  const stopped=await page.locator('#timeline').inputValue();
+  await page.waitForTimeout(300);
+  assert.equal(await page.locator('#timeline').inputValue(),stopped,'timeline moved while paused');
+  report.checks.push('User click starts audio and film; pause freezes the time and pauses both tracks.');
+  assert.equal(await page.evaluate(()=>document.querySelector('#score-track').paused&&document.querySelector('#narration-track').paused),true);
+  const captures=new Set(['image','exodus','cross','resurrection','judgment','new']);
+  for(const s of scenes){
+    await seek(sceneStarts[s.index]+3);
+    await page.waitForFunction(id=>document.body.dataset.scene===id,s.id);
+    assert.equal(await page.locator('#caption').textContent(),s.paragraphs[0]);
+    if(captures.has(s.id)){await page.waitForTimeout(1700);await page.screenshot({path:`artifacts/scene-${s.id}.png`});}
+    console.log(`Verify scene ${s.index+1}/38: ${s.id}`);
+  }
+  report.checks.push('All 38 scenes load their own 3D visual and matching first caption without runtime errors.');
+  await seek(sceneStarts[26]+scenes[26].duration/3+1);
+  assert.equal(await page.locator('#caption').textContent(),scenes[26].paragraphs[1]);
+  const audioTimes=await page.evaluate(()=>['score-track','narration-track'].map(id=>document.getElementById(id).currentTime));
+  audioTimes.forEach(t=>assert.ok(Math.abs(t-(sceneStarts[26]+scenes[26].duration/3+1))<.15));
+  await page.locator('#next').click();assert.equal(await page.locator('body').getAttribute('data-scene'),'silence');
+  await page.locator('#previous').click();assert.equal(await page.locator('body').getAttribute('data-scene'),'cross');
+  report.checks.push('Seeking changes the correct caption and synchronizes both audio tracks; previous/next work.');
+  await page.locator('#mute').click();assert.equal(await page.locator('#mute').getAttribute('aria-label'),'소리 켜기');
+  assert.equal(await page.locator('#score-track').evaluate(el=>el.volume),0); await page.locator('#mute').click();
+  await page.locator('#captions').click();assert.equal(await page.locator('#captions').getAttribute('aria-pressed'),'false');await page.locator('#captions').click();
+  await page.locator('#reference').click();assert.ok(await page.locator('#library').isVisible());
+  assert.ok((await page.locator('#script-text').textContent()).includes('다 이루었다'));
+  await page.locator('[data-tab="books"]').click();assert.equal(await page.locator('.book-group details').count(),66);
+  await page.locator('#book-search').fill('요한계시록');assert.equal(await page.locator('.book-group details').count(),1);
+  await page.locator('.book-group summary').click();await page.locator('.book-group [data-scene]').click();
+  assert.equal(await page.locator('body').getAttribute('data-scene'),'judgment');await page.locator('#play').click();
+  report.checks.push('Mute, captions, source panel, 66-book search, and book-to-film navigation work.');
+  await page.locator('#about-open').click();await page.locator('#voice-toggle').uncheck();
+  assert.equal(await page.locator('#narration-track').evaluate(el=>el.volume),0);
+  await page.locator('#motion-toggle').check();assert.ok(await page.locator('body').evaluate(el=>el.classList.contains('reduced-motion')));
+  await page.locator('#close-library').click();
+  await seek(totalDuration-.3);await page.locator('#play').click();await page.locator('#endcard').waitFor();
+  assert.equal(await page.locator('#score-track').evaluate(el=>el.paused),true);
+  report.checks.push('Narration toggle and reduced motion work; the full ending stops media and displays the invitation.');
+  await page.setViewportSize({width:390,height:844});await page.locator('#home').click();await page.waitForTimeout(500);
+  await page.screenshot({path:'artifacts/hero-mobile.png'});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile horizontal overflow');
+  await page.locator('#start').click();await page.locator('#play').click();await seek(sceneStarts[36]+4);
+  await page.waitForTimeout(400);await page.screenshot({path:'artifacts/film-mobile.png'});
+  const boxes=await page.evaluate(()=>{const title=document.querySelector('#scene-title').getBoundingClientRect(),caption=document.querySelector('.caption-wrap').getBoundingClientRect(),controls=document.querySelector('#transport').getBoundingClientRect();return {titleBottom:title.bottom,captionTop:caption.top,captionBottom:caption.bottom,controlsTop:controls.top};});
+  assert.ok(boxes.titleBottom<boxes.captionTop,'mobile title overlaps captions');
+  assert.ok(boxes.captionBottom<boxes.controlsTop,'mobile captions overlap controls');
+  report.checks.push('390×844 mobile layout has no horizontal overflow or title/caption/control overlap.');
+  assert.deepEqual(report.errors,[]);
+  report.passed=true;
+  console.log(JSON.stringify(report,null,2));
+} catch(error) { report.passed=false;report.failure=error.stack;console.error(error);process.exitCode=1; }
+finally { writeFileSync('artifacts/verification.json',JSON.stringify(report,null,2));await browser.close(); }

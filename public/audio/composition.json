@@ -1,0 +1,235 @@
+{
+  "title": "끝까지 사랑하시니 — Original Motion Picture Suite",
+  "author": "Original procedural composition created for this project",
+  "duration": 1460,
+  "cues": [
+    {
+      "scene": "before",
+      "duration": 36,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "creation",
+      "duration": 35,
+      "key": "D major",
+      "motif": "Homecoming"
+    },
+    {
+      "scene": "image",
+      "duration": 34,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "fall",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "flood",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "babel",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "abraham",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "isaac",
+      "duration": 36,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "jacob",
+      "duration": 36,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "joseph",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "exodus",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "law",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "wilderness",
+      "duration": 40,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "land",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "judges",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "david",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "wisdom",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "divided",
+      "duration": 40,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "prophets",
+      "duration": 36,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "exile",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "return",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "incarnation",
+      "duration": 35,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "kingdom",
+      "duration": 42,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "compassion",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "lost",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "gethsemane",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "cross",
+      "duration": 42,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "silence",
+      "duration": 34,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "resurrection",
+      "duration": 41,
+      "key": "D major",
+      "motif": "Homecoming"
+    },
+    {
+      "scene": "ascension",
+      "duration": 38,
+      "key": "D major",
+      "motif": "Homecoming"
+    },
+    {
+      "scene": "pentecost",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "church",
+      "duration": 40,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "grace",
+      "duration": 37,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "coming",
+      "duration": 38,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "reign",
+      "duration": 39,
+      "key": "D minor",
+      "motif": "Promise"
+    },
+    {
+      "scene": "judgment",
+      "duration": 46,
+      "key": "D minor",
+      "motif": "Lament"
+    },
+    {
+      "scene": "new",
+      "duration": 45,
+      "key": "D major",
+      "motif": "Homecoming"
+    },
+    {
+      "scene": "invitation",
+      "duration": 44,
+      "key": "D major",
+      "motif": "Homecoming"
+    }
+  ]
+}

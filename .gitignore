@@ -1,0 +1,20 @@
+node_modules/
+dist/
+release/
+artifacts/
+public/audio/*.wav
+*.log
+
+# Local production notes and generated planning records
+docs/progress.md
+docs/superpowers/
+
+# Local configuration and operating-system files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+.venv/

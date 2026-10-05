@@ -1,0 +1,31 @@
+import { chromium } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { scenes, sceneStarts } from '../src/story.js';
+const browser=await chromium.launch({channel:'msedge',headless:true,timeout:120000});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(60000);
+let release;
+const gate=new Promise(resolve=>{release=resolve;});
+await page.route('**/audio/narration.mp3',async route=>{await gate;await route.continue().catch(()=>{});});
+const result={};
+try{
+  console.log('Regression: loading');
+  await page.goto('http://127.0.0.1:5197',{waitUntil:'domcontentloaded',timeout:120000});
+  await page.locator('#start').waitFor();await page.evaluate(()=>document.fonts.ready);
+  console.log('Regression: begin with blocked narration');
+  await page.locator('#start').click();await page.waitForTimeout(1400);
+  result.waitingTime=Number(await page.locator('#timeline').inputValue());
+  result.waitsForNarration=result.waitingTime<.2;
+  await page.locator('#play').click();
+  release();
+  console.log('Regression: landscape');
+  await page.setViewportSize({width:844,height:390});
+  await page.locator('#timeline').evaluate((el,t)=>{el.value=t;el.dispatchEvent(new Event('input',{bubbles:true}));},sceneStarts[36]+4);
+  const bounds=await page.evaluate(()=>{const a=document.querySelector('#scene-title').getBoundingClientRect(),b=document.querySelector('.caption-wrap').getBoundingClientRect(),c=document.querySelector('#transport').getBoundingClientRect();return {titleBottom:a.bottom,captionTop:b.top,captionBottom:b.bottom,controlsTop:c.top};});
+  result.landscapeBounds=bounds;result.noLandscapeOverlap=bounds.titleBottom<bounds.captionTop&&bounds.captionBottom<bounds.controlsTop;
+  await page.locator('#play').focus();await page.keyboard.press('m');
+  result.shortcutAfterButtonFocus=await page.locator('#mute').getAttribute('aria-label')==='소리 켜기';
+  await page.screenshot({path:'artifacts/landscape.png'});
+  result.passed=result.waitsForNarration&&result.noLandscapeOverlap&&result.shortcutAfterButtonFocus;
+  mkdirSync('artifacts',{recursive:true});writeFileSync('artifacts/regression.json',JSON.stringify(result,null,2));
+  console.log(JSON.stringify(result,null,2));if(!result.passed)process.exitCode=1;
+}finally{release();await browser.close();}
